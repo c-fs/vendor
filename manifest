@@ -52,6 +52,12 @@
 			"path": "/proto"
 		},
 		{
+			"importpath": "github.com/golang/glog",
+			"repository": "https://github.com/golang/glog",
+			"revision": "fca8c8854093a154ff1eb580aae10276ad6b1b5f",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/golang/protobuf/proto",
 			"repository": "https://github.com/golang/protobuf",
 			"revision": "1dceb1a2654bdc74ca97ad91f71f500eecc96269",
@@ -59,11 +65,32 @@
 			"path": "/proto"
 		},
 		{
+			"importpath": "github.com/google/cadvisor/cache/memory",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/cache/memory"
+		},
+		{
 			"importpath": "github.com/google/cadvisor/info/v1",
 			"repository": "https://github.com/google/cadvisor",
 			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
 			"branch": "master",
 			"path": "/info/v1"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/storage",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/storage"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/utils",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/utils"
 		},
 		{
 			"importpath": "github.com/hashicorp/go-msgpack/codec",
