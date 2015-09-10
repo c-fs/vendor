@@ -8,6 +8,12 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/Sirupsen/logrus",
+			"repository": "https://github.com/Sirupsen/logrus",
+			"revision": "418b41d23a1bf978c06faea5313ba194650ac088",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/armon/go-metrics",
 			"repository": "https://github.com/armon/go-metrics",
 			"revision": "6c5fa0d8f48f4661c9ba8709799c88d425ad20f0",
@@ -38,11 +44,78 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/coreos/go-systemd/dbus",
+			"repository": "https://github.com/coreos/go-systemd",
+			"revision": "392c689e425689acb51976419a8d62878966511f",
+			"branch": "master",
+			"path": "/dbus"
+		},
+		{
 			"importpath": "github.com/cpuguy83/go-md2man/md2man",
 			"repository": "https://github.com/cpuguy83/go-md2man",
 			"revision": "71acacd42f85e5e82f70a55327789582a5200a90",
 			"branch": "master",
 			"path": "/md2man"
+		},
+		{
+			"importpath": "github.com/docker/docker/pkg/mount",
+			"repository": "https://github.com/docker/docker",
+			"revision": "072790bb3bc3380e8069a480dfbc583e5ccff19d",
+			"branch": "master",
+			"path": "/pkg/mount"
+		},
+		{
+			"importpath": "github.com/docker/docker/pkg/symlink",
+			"repository": "https://github.com/docker/docker",
+			"revision": "072790bb3bc3380e8069a480dfbc583e5ccff19d",
+			"branch": "master",
+			"path": "/pkg/symlink"
+		},
+		{
+			"importpath": "github.com/docker/docker/pkg/system",
+			"repository": "https://github.com/docker/docker",
+			"revision": "072790bb3bc3380e8069a480dfbc583e5ccff19d",
+			"branch": "master",
+			"path": "/pkg/system"
+		},
+		{
+			"importpath": "github.com/docker/docker/pkg/units",
+			"repository": "https://github.com/docker/docker",
+			"revision": "072790bb3bc3380e8069a480dfbc583e5ccff19d",
+			"branch": "master",
+			"path": "/pkg/units"
+		},
+		{
+			"importpath": "github.com/docker/libcontainer",
+			"repository": "https://github.com/docker/libcontainer",
+			"revision": "83a102cc68a09d890cce3b6c2e5c14c49e6373a0",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/docker/libcontainer/cgroups",
+			"repository": "https://github.com/docker/libcontainer",
+			"revision": "83a102cc68a09d890cce3b6c2e5c14c49e6373a0",
+			"branch": "master",
+			"path": "/cgroups"
+		},
+		{
+			"importpath": "github.com/docker/libcontainer/configs",
+			"repository": "https://github.com/docker/libcontainer",
+			"revision": "83a102cc68a09d890cce3b6c2e5c14c49e6373a0",
+			"branch": "master",
+			"path": "/configs"
+		},
+		{
+			"importpath": "github.com/fsouza/go-dockerclient",
+			"repository": "https://github.com/fsouza/go-dockerclient",
+			"revision": "1991acc6d7b56fde34281b115e11596833e8d7de",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/godbus/dbus",
+			"repository": "https://github.com/godbus/dbus",
+			"revision": "e5cbcd13e3ec6bc46adf1c690e4de6284086dda6",
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/gogo/protobuf/proto",
@@ -72,11 +145,53 @@
 			"path": "/cache/memory"
 		},
 		{
+			"importpath": "github.com/google/cadvisor/collector",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/collector"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/container",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/container"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/events",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/events"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/fs",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/fs"
+		},
+		{
 			"importpath": "github.com/google/cadvisor/info/v1",
 			"repository": "https://github.com/google/cadvisor",
 			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
 			"branch": "master",
 			"path": "/info/v1"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/info/v2",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/info/v2"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/manager",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/manager"
 		},
 		{
 			"importpath": "github.com/google/cadvisor/storage",
@@ -86,11 +201,25 @@
 			"path": "/storage"
 		},
 		{
+			"importpath": "github.com/google/cadvisor/summary",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/summary"
+		},
+		{
 			"importpath": "github.com/google/cadvisor/utils",
 			"repository": "https://github.com/google/cadvisor",
 			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
 			"branch": "master",
 			"path": "/utils"
+		},
+		{
+			"importpath": "github.com/google/cadvisor/version",
+			"repository": "https://github.com/google/cadvisor",
+			"revision": "b22a08525784f32fa5f188d2974705a68c68d480",
+			"branch": "master",
+			"path": "/version"
 		},
 		{
 			"importpath": "github.com/hashicorp/go-msgpack/codec",
@@ -182,6 +311,33 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/stretchr/objx",
+			"repository": "https://github.com/stretchr/objx",
+			"revision": "cbeaeb16a013161a98496fad62933b1d21786672",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/stretchr/testify/assert",
+			"repository": "https://github.com/stretchr/testify",
+			"revision": "7c2b1e5640dcf2631213ca962d892bffa1e08860",
+			"branch": "master",
+			"path": "/assert"
+		},
+		{
+			"importpath": "github.com/stretchr/testify/mock",
+			"repository": "https://github.com/stretchr/testify",
+			"revision": "7c2b1e5640dcf2631213ca962d892bffa1e08860",
+			"branch": "master",
+			"path": "/mock"
+		},
+		{
+			"importpath": "github.com/syndtr/gocapability/capability",
+			"repository": "https://github.com/syndtr/gocapability",
+			"revision": "2c00daeb6c3b45114c80ac44119e7b8801fdd852",
+			"branch": "master",
+			"path": "/capability"
+		},
+		{
 			"importpath": "golang.org/x/crypto/bcrypt",
 			"repository": "https://go.googlesource.com/crypto",
 			"revision": "aedad9a179ec1ea11b7064c57cbc6dc30d7724ec",
@@ -194,6 +350,13 @@
 			"revision": "aedad9a179ec1ea11b7064c57cbc6dc30d7724ec",
 			"branch": "master",
 			"path": "/blowfish"
+		},
+		{
+			"importpath": "golang.org/x/exp/inotify",
+			"repository": "https://go.googlesource.com/exp",
+			"revision": "a45df42e783a0529250b30b24374f1050ea05eb5",
+			"branch": "master",
+			"path": "/inotify"
 		},
 		{
 			"importpath": "golang.org/x/net/context",
@@ -215,6 +378,20 @@
 			"revision": "db8e4de5b2d6653f66aea53094624468caad15d2",
 			"branch": "master",
 			"path": "/trace"
+		},
+		{
+			"importpath": "google.golang.org/cloud/compute/metadata",
+			"repository": "https://code.googlesource.com/gocloud",
+			"revision": "a128c777c40402d8b287fcd0a614f80c4ee4f7b5",
+			"branch": "master",
+			"path": "/compute/metadata"
+		},
+		{
+			"importpath": "google.golang.org/cloud/internal",
+			"repository": "https://code.googlesource.com/gocloud",
+			"revision": "a128c777c40402d8b287fcd0a614f80c4ee4f7b5",
+			"branch": "master",
+			"path": "/internal"
 		},
 		{
 			"importpath": "google.golang.org/grpc",
