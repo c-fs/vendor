@@ -46,8 +46,8 @@
 		{
 			"importpath": "github.com/coreos/go-systemd/dbus",
 			"repository": "https://github.com/coreos/go-systemd",
-			"revision": "392c689e425689acb51976419a8d62878966511f",
-			"branch": "master",
+			"revision": "97e243d21a8e232e9d8af38ba2366dfcfceebeba",
+			"branch": "HEAD",
 			"path": "/dbus"
 		},
 		{
