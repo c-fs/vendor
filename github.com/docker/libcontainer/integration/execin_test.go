@@ -44,13 +44,14 @@ func TestExecIn(t *testing.T) {
 		Stdout: buffers.Stdout,
 		Stderr: buffers.Stderr,
 	}
-
 	err = container.Start(ps)
 	ok(t, err)
-	waitProcess(ps, t)
+	_, err = ps.Wait()
+	ok(t, err)
 	stdinW.Close()
-	waitProcess(process, t)
-
+	if _, err := process.Wait(); err != nil {
+		t.Log(err)
+	}
 	out := buffers.Stdout.String()
 	if !strings.Contains(out, "cat") || !strings.Contains(out, "ps") {
 		t.Fatalf("unexpected running process, output %q", out)
@@ -91,11 +92,12 @@ func TestExecInRlimit(t *testing.T) {
 	}
 	err = container.Start(ps)
 	ok(t, err)
-	waitProcess(ps, t)
-
+	_, err = ps.Wait()
+	ok(t, err)
 	stdinW.Close()
-	waitProcess(process, t)
-
+	if _, err := process.Wait(); err != nil {
+		t.Log(err)
+	}
 	out := buffers.Stdout.String()
 	if limit := strings.TrimSpace(out); limit != "1025" {
 		t.Fatalf("expected rlimit to be 1025, got %s", limit)
@@ -189,11 +191,12 @@ func TestExecInTTY(t *testing.T) {
 		t.Fatal("Waiting for copy timed out")
 	case <-copy:
 	}
-	waitProcess(ps, t)
-
+	_, err = ps.Wait()
+	ok(t, err)
 	stdinW.Close()
-	waitProcess(process, t)
-
+	if _, err := process.Wait(); err != nil {
+		t.Log(err)
+	}
 	out := stdout.String()
 	if !strings.Contains(out, "cat") || !strings.Contains(string(out), "ps") {
 		t.Fatalf("unexpected running process, output %q", out)
@@ -240,11 +243,14 @@ func TestExecInEnvironment(t *testing.T) {
 	}
 	err = container.Start(process2)
 	ok(t, err)
-	waitProcess(process2, t)
-
+	if _, err := process2.Wait(); err != nil {
+		out := buffers.Stdout.String()
+		t.Fatal(err, out)
+	}
 	stdinW.Close()
-	waitProcess(process, t)
-
+	if _, err := process.Wait(); err != nil {
+		t.Log(err)
+	}
 	out := buffers.Stdout.String()
 	// check execin's process environment
 	if !strings.Contains(out, "DEBUG=false") ||

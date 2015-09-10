@@ -21,9 +21,6 @@ func GenerateRandomName(prefix string, size int) (string, error) {
 	if _, err := io.ReadFull(rand.Reader, id); err != nil {
 		return "", err
 	}
-	if size > 64 {
-		size = 64
-	}
 	return prefix + hex.EncodeToString(id)[:size], nil
 }
 

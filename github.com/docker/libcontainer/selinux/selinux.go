@@ -34,6 +34,7 @@ const (
 
 var (
 	assignRegex           = regexp.MustCompile(`^([^=]+)=(.*)$`)
+	spaceRegex            = regexp.MustCompile(`^([^=]+) (.*)$`)
 	mcsList               = make(map[string]bool)
 	selinuxfs             = "unknown"
 	selinuxEnabled        = false // Stores whether selinux is currently enabled
@@ -266,6 +267,10 @@ func mcsAdd(mcs string) error {
 
 func mcsDelete(mcs string) {
 	mcsList[mcs] = false
+}
+
+func mcsExists(mcs string) bool {
+	return mcsList[mcs]
 }
 
 func IntToMcs(id int, catRange uint32) string {

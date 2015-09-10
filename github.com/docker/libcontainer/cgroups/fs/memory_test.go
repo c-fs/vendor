@@ -1,5 +1,3 @@
-// +build linux
-
 package fs
 
 import (
@@ -85,59 +83,32 @@ func TestMemorySetMemoryswap(t *testing.T) {
 	}
 }
 
-func TestMemorySetKernelMemory(t *testing.T) {
+func TestMemorySetMemoryswapDefault(t *testing.T) {
 	helper := NewCgroupTestUtil("memory", t)
 	defer helper.cleanup()
 
 	const (
-		kernelMemoryBefore = 314572800 // 300M
-		kernelMemoryAfter  = 524288000 // 500M
+		memoryBefore    = 209715200 // 200M
+		memoryAfter     = 314572800 // 300M
+		memoryswapAfter = 629145600 // 300M*2
 	)
 
 	helper.writeFileContents(map[string]string{
-		"memory.kmem.limit_in_bytes": strconv.Itoa(kernelMemoryBefore),
+		"memory.limit_in_bytes": strconv.Itoa(memoryBefore),
 	})
 
-	helper.CgroupData.c.KernelMemory = kernelMemoryAfter
+	helper.CgroupData.c.Memory = memoryAfter
 	memory := &MemoryGroup{}
 	if err := memory.Set(helper.CgroupPath, helper.CgroupData.c); err != nil {
 		t.Fatal(err)
 	}
 
-	value, err := getCgroupParamUint(helper.CgroupPath, "memory.kmem.limit_in_bytes")
+	value, err := getCgroupParamUint(helper.CgroupPath, "memory.memsw.limit_in_bytes")
 	if err != nil {
-		t.Fatalf("Failed to parse memory.kmem.limit_in_bytes - %s", err)
+		t.Fatalf("Failed to parse memory.memsw.limit_in_bytes - %s", err)
 	}
-	if value != kernelMemoryAfter {
-		t.Fatal("Got the wrong value, set memory.kmem.limit_in_bytes failed.")
-	}
-}
-
-func TestMemorySetMemorySwappinessDefault(t *testing.T) {
-	helper := NewCgroupTestUtil("memory", t)
-	defer helper.cleanup()
-
-	const (
-		swappinessBefore = 60 //deafult is 60
-		swappinessAfter  = 0
-	)
-
-	helper.writeFileContents(map[string]string{
-		"memory.swappiness": strconv.Itoa(swappinessBefore),
-	})
-
-	helper.CgroupData.c.Memory = swappinessAfter
-	memory := &MemoryGroup{}
-	if err := memory.Set(helper.CgroupPath, helper.CgroupData.c); err != nil {
-		t.Fatal(err)
-	}
-
-	value, err := getCgroupParamUint(helper.CgroupPath, "memory.swappiness")
-	if err != nil {
-		t.Fatalf("Failed to parse memory.swappiness - %s", err)
-	}
-	if value != swappinessAfter {
-		t.Fatal("Got the wrong value, set memory.swappiness failed.")
+	if value != memoryswapAfter {
+		t.Fatal("Got the wrong value, set memory.memsw.limit_in_bytes failed.")
 	}
 }
 
@@ -145,16 +116,10 @@ func TestMemoryStats(t *testing.T) {
 	helper := NewCgroupTestUtil("memory", t)
 	defer helper.cleanup()
 	helper.writeFileContents(map[string]string{
-		"memory.stat":                     memoryStatContents,
-		"memory.usage_in_bytes":           memoryUsageContents,
-		"memory.max_usage_in_bytes":       memoryMaxUsageContents,
-		"memory.failcnt":                  memoryFailcnt,
-		"memory.memsw.usage_in_bytes":     memoryUsageContents,
-		"memory.memsw.max_usage_in_bytes": memoryMaxUsageContents,
-		"memory.memsw.failcnt":            memoryFailcnt,
-		"memory.kmem.usage_in_bytes":      memoryUsageContents,
-		"memory.kmem.max_usage_in_bytes":  memoryMaxUsageContents,
-		"memory.kmem.failcnt":             memoryFailcnt,
+		"memory.stat":               memoryStatContents,
+		"memory.usage_in_bytes":     memoryUsageContents,
+		"memory.max_usage_in_bytes": memoryMaxUsageContents,
+		"memory.failcnt":            memoryFailcnt,
 	})
 
 	memory := &MemoryGroup{}
@@ -163,7 +128,7 @@ func TestMemoryStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	expectedStats := cgroups.MemoryStats{Cache: 512, Usage: cgroups.MemoryData{Usage: 2048, MaxUsage: 4096, Failcnt: 100}, SwapUsage: cgroups.MemoryData{Usage: 2048, MaxUsage: 4096, Failcnt: 100}, KernelUsage: cgroups.MemoryData{Usage: 2048, MaxUsage: 4096, Failcnt: 100}, Stats: map[string]uint64{"cache": 512, "rss": 1024}}
+	expectedStats := cgroups.MemoryStats{Usage: 2048, Cache: 512, MaxUsage: 4096, Failcnt: 100, Stats: map[string]uint64{"cache": 512, "rss": 1024}}
 	expectMemoryStatEquals(t, expectedStats, actualStats.MemoryStats)
 }
 

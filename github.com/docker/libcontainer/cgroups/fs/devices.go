@@ -1,5 +1,3 @@
-// +build linux
-
 package fs
 
 import (
@@ -13,8 +11,6 @@ type DevicesGroup struct {
 func (s *DevicesGroup) Apply(d *data) error {
 	dir, err := d.join("devices")
 	if err != nil {
-		// We will return error even it's `not found` error, devices
-		// cgroup is hard requirement for container's security.
 		return err
 	}
 

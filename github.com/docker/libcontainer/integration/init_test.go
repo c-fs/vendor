@@ -5,7 +5,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/docker/libcontainer"
 	"github.com/docker/libcontainer/cgroups/systemd"
 	_ "github.com/docker/libcontainer/nsenter"
@@ -21,15 +21,15 @@ func init() {
 	runtime.LockOSThread()
 	factory, err := libcontainer.New("")
 	if err != nil {
-		logrus.Fatalf("unable to initialize for container: %s", err)
+		log.Fatalf("unable to initialize for container: %s", err)
 	}
 	if err := factory.StartInitialization(); err != nil {
-		logrus.Fatal(err)
+		log.Fatal(err)
 	}
 }
 
 var (
-	factory        libcontainer.Factory
+	factory libcontainer.Factory
 	systemdFactory libcontainer.Factory
 )
 
@@ -39,18 +39,18 @@ func TestMain(m *testing.M) {
 		ret int = 0
 	)
 
-	logrus.SetOutput(os.Stderr)
-	logrus.SetLevel(logrus.InfoLevel)
+	log.SetOutput(os.Stderr)
+	log.SetLevel(log.InfoLevel)
 
 	factory, err = libcontainer.New(".", libcontainer.Cgroupfs)
 	if err != nil {
-		logrus.Error(err)
+		log.Error(err)
 		os.Exit(1)
 	}
 	if systemd.UseSystemd() {
 		systemdFactory, err = libcontainer.New(".", libcontainer.SystemdCgroups)
 		if err != nil {
-			logrus.Error(err)
+			log.Error(err)
 			os.Exit(1)
 		}
 	}

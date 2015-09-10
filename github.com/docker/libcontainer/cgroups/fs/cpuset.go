@@ -1,5 +1,3 @@
-// +build linux
-
 package fs
 
 import (
@@ -18,9 +16,10 @@ type CpusetGroup struct {
 
 func (s *CpusetGroup) Apply(d *data) error {
 	dir, err := d.path("cpuset")
-	if err != nil && !cgroups.IsNotFound(err) {
+	if err != nil {
 		return err
 	}
+
 	return s.ApplyDir(dir, d.c, d.pid)
 }
 
@@ -30,11 +29,13 @@ func (s *CpusetGroup) Set(path string, cgroup *configs.Cgroup) error {
 			return err
 		}
 	}
+
 	if cgroup.CpusetMems != "" {
 		if err := writeFile(path, "cpuset.mems", cgroup.CpusetMems); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -47,18 +48,10 @@ func (s *CpusetGroup) GetStats(path string, stats *cgroups.Stats) error {
 }
 
 func (s *CpusetGroup) ApplyDir(dir string, cgroup *configs.Cgroup, pid int) error {
-	// This might happen if we have no cpuset cgroup mounted.
-	// Just do nothing and don't fail.
-	if dir == "" {
-		return nil
-	}
-	root, err := getCgroupRoot()
-	if err != nil {
+	if err := s.ensureParent(dir); err != nil {
 		return err
 	}
-	if err := s.ensureParent(dir, root); err != nil {
-		return err
-	}
+
 	// because we are not using d.join we need to place the pid into the procs file
 	// unlike the other subsystems
 	if err := writeFile(dir, "cgroup.procs", strconv.Itoa(pid)); err != nil {
@@ -84,17 +77,22 @@ func (s *CpusetGroup) getSubsystemSettings(parent string) (cpus []byte, mems []b
 	return cpus, mems, nil
 }
 
-// ensureParent makes sure that the parent directory of current is created
-// and populated with the proper cpus and mems files copied from
-// it's parent.
-func (s *CpusetGroup) ensureParent(current, root string) error {
+// ensureParent ensures that the parent directory of current is created
+// with the proper cpus and mems files copied from it's parent if the values
+// are a file with a new line char
+func (s *CpusetGroup) ensureParent(current string) error {
 	parent := filepath.Dir(current)
-	if filepath.Clean(parent) == root {
-		return nil
+
+	if _, err := os.Stat(parent); err != nil {
+		if !os.IsNotExist(err) {
+			return err
+		}
+
+		if err := s.ensureParent(parent); err != nil {
+			return err
+		}
 	}
-	if err := s.ensureParent(parent, root); err != nil {
-		return err
-	}
+
 	if err := os.MkdirAll(current, 0755); err != nil && !os.IsExist(err) {
 		return err
 	}

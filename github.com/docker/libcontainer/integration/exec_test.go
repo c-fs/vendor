@@ -182,6 +182,14 @@ func newTestRoot() (string, error) {
 	return dir, nil
 }
 
+func waitProcess(p *libcontainer.Process, t *testing.T) {
+	status, err := p.Wait()
+	ok(t, err)
+	if !status.Success() {
+		t.Fatal(status)
+	}
+}
+
 func TestEnter(t *testing.T) {
 	if testing.Short() {
 		return
@@ -386,53 +394,6 @@ func TestProcessCaps(t *testing.T) {
 	}
 }
 
-func TestAdditionalGroups(t *testing.T) {
-	if testing.Short() {
-		return
-	}
-	root, err := newTestRoot()
-	ok(t, err)
-	defer os.RemoveAll(root)
-
-	rootfs, err := newRootfs()
-	ok(t, err)
-	defer remove(rootfs)
-
-	config := newTemplateConfig(rootfs)
-	config.AdditionalGroups = []string{"plugdev", "audio"}
-
-	factory, err := libcontainer.New(root, libcontainer.Cgroupfs)
-	ok(t, err)
-
-	container, err := factory.Create("test", config)
-	ok(t, err)
-	defer container.Destroy()
-
-	var stdout bytes.Buffer
-	pconfig := libcontainer.Process{
-		Args:   []string{"sh", "-c", "id", "-Gn"},
-		Env:    standardEnvironment,
-		Stdin:  nil,
-		Stdout: &stdout,
-	}
-	err = container.Start(&pconfig)
-	ok(t, err)
-
-	// Wait for process
-	waitProcess(&pconfig, t)
-
-	outputGroups := string(stdout.Bytes())
-
-	// Check that the groups output has the groups that we specified
-	if !strings.Contains(outputGroups, "audio") {
-		t.Fatalf("Listed groups do not contain the audio group as expected: %v", outputGroups)
-	}
-
-	if !strings.Contains(outputGroups, "plugdev") {
-		t.Fatalf("Listed groups do not contain the plugdev group as expected: %v", outputGroups)
-	}
-}
-
 func TestFreeze(t *testing.T) {
 	testFreeze(t, false)
 }
@@ -469,14 +430,20 @@ func testFreeze(t *testing.T, systemd bool) {
 	stdinR, stdinW, err := os.Pipe()
 	ok(t, err)
 
-	pconfig := &libcontainer.Process{
+	pconfig := libcontainer.Process{
 		Args:  []string{"cat"},
 		Env:   standardEnvironment,
 		Stdin: stdinR,
 	}
-	err = container.Start(pconfig)
+	err = container.Start(&pconfig)
 	stdinR.Close()
 	defer stdinW.Close()
+	ok(t, err)
+
+	pid, err := pconfig.Pid()
+	ok(t, err)
+
+	process, err := os.FindProcess(pid)
 	ok(t, err)
 
 	err = container.Pause()
@@ -490,14 +457,19 @@ func testFreeze(t *testing.T, systemd bool) {
 	}
 
 	stdinW.Close()
-	waitProcess(pconfig, t)
+	s, err := process.Wait()
+	ok(t, err)
+
+	if !s.Success() {
+		t.Fatal(s.String())
+	}
 }
 
 func TestCpuShares(t *testing.T) {
 	testCpuShares(t, false)
 }
 
-func TestCpuSharesSystemd(t *testing.T) {
+func TestSystemdCpuShares(t *testing.T) {
 	if !systemd.UseSystemd() {
 		t.Skip("Systemd is unsupported")
 	}
@@ -521,37 +493,6 @@ func testCpuShares(t *testing.T, systemd bool) {
 	_, _, err = runContainer(config, "", "ps")
 	if err == nil {
 		t.Fatalf("runContainer should failed with invalid CpuShares")
-	}
-}
-
-func TestRunWithKernelMemory(t *testing.T) {
-	testRunWithKernelMemory(t, false)
-}
-
-func TestRunWithKernelMemorySystemd(t *testing.T) {
-	if !systemd.UseSystemd() {
-		t.Skip("Systemd is unsupported")
-	}
-	testRunWithKernelMemory(t, true)
-}
-
-func testRunWithKernelMemory(t *testing.T, systemd bool) {
-	if testing.Short() {
-		return
-	}
-	rootfs, err := newRootfs()
-	ok(t, err)
-	defer remove(rootfs)
-
-	config := newTemplateConfig(rootfs)
-	if systemd {
-		config.Cgroups.Slice = "system.slice"
-	}
-	config.Cgroups.KernelMemory = 52428800
-
-	_, _, err = runContainer(config, "", "ps")
-	if err != nil {
-		t.Fatalf("runContainer failed with kernel memory limit: %v", err)
 	}
 }
 
@@ -606,7 +547,7 @@ func TestContainerState(t *testing.T) {
 		t.Fatal(err)
 	}
 	stdinR.Close()
-	defer stdinW.Close()
+	defer p.Signal(os.Kill)
 
 	st, err := container.State()
 	if err != nil {
@@ -621,7 +562,7 @@ func TestContainerState(t *testing.T) {
 		t.Fatal("Container using non-host ipc namespace")
 	}
 	stdinW.Close()
-	waitProcess(p, t)
+	p.Wait()
 }
 
 func TestPassExtraFiles(t *testing.T) {
@@ -710,7 +651,7 @@ func TestMountCmds(t *testing.T) {
 	config := newTemplateConfig(rootfs)
 	config.Mounts = append(config.Mounts, &configs.Mount{
 		Source:      tmpDir,
-		Destination: "/tmp",
+		Destination: filepath.Join(rootfs, "tmp"),
 		Device:      "bind",
 		Flags:       syscall.MS_BIND | syscall.MS_REC,
 		PremountCmds: []configs.Command{
@@ -790,29 +731,5 @@ func TestSystemProperties(t *testing.T) {
 	shmmniOutput := strings.TrimSpace(string(stdout.Bytes()))
 	if shmmniOutput != "8192" {
 		t.Fatalf("kernel.shmmni property expected to be 8192, but is %s", shmmniOutput)
-	}
-}
-
-func TestSeccompNoChown(t *testing.T) {
-	if testing.Short() {
-		return
-	}
-	rootfs, err := newRootfs()
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer remove(rootfs)
-	config := newTemplateConfig(rootfs)
-	config.Seccomp = &configs.Seccomp{}
-	config.Seccomp.Syscalls = append(config.Seccomp.Syscalls, &configs.Syscall{
-		Value:  syscall.SYS_CHOWN,
-		Action: configs.Action(syscall.EPERM),
-	})
-	buffers, _, err := runContainer(config, "", "/bin/sh", "-c", "chown 1:1 /tmp")
-	if err == nil {
-		t.Fatal("running chown in a container should fail")
-	}
-	if s := buffers.String(); !strings.Contains(s, "not permitted") {
-		t.Fatalf("running chown should result in an EPERM but got %q", s)
 	}
 }

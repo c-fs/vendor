@@ -32,6 +32,24 @@
 			"branch": "master"
 		},
 		{
+			"importpath": "github.com/bugsnag/bugsnag-go",
+			"repository": "https://github.com/bugsnag/bugsnag-go",
+			"revision": "9ee24c1db7e2c5b87e7228acb3e587a35124a041",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/bugsnag/osext",
+			"repository": "https://github.com/bugsnag/osext",
+			"revision": "0dd3f918b21bec95ace9dc86c7e70266cfc5c702",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/bugsnag/panicwrap",
+			"repository": "https://github.com/bugsnag/panicwrap",
+			"revision": "e5f9854865b9778a45169fc249e99e338d4d6f27",
+			"branch": "master"
+		},
+		{
 			"importpath": "github.com/codahale/hdrhistogram",
 			"repository": "https://github.com/codahale/hdrhistogram",
 			"revision": "954f16e8b9ef0e5d5189456aa4c1202758e04f17",
@@ -42,6 +60,19 @@
 			"repository": "https://github.com/codahale/metrics",
 			"revision": "7c37910bc765e705301b159683480bdd44555c91",
 			"branch": "master"
+		},
+		{
+			"importpath": "github.com/codegangsta/cli",
+			"repository": "https://github.com/codegangsta/cli",
+			"revision": "a65b733b303f0055f8d324d805f393cd3e7a7904",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/coreos/go-systemd/activation",
+			"repository": "https://github.com/coreos/go-systemd",
+			"revision": "392c689e425689acb51976419a8d62878966511f",
+			"branch": "master",
+			"path": "/activation"
 		},
 		{
 			"importpath": "github.com/coreos/go-systemd/dbus",
@@ -79,6 +110,13 @@
 			"path": "/pkg/system"
 		},
 		{
+			"importpath": "github.com/docker/docker/pkg/term",
+			"repository": "https://github.com/docker/docker",
+			"revision": "072790bb3bc3380e8069a480dfbc583e5ccff19d",
+			"branch": "master",
+			"path": "/pkg/term"
+		},
+		{
 			"importpath": "github.com/docker/docker/pkg/units",
 			"repository": "https://github.com/docker/docker",
 			"revision": "072790bb3bc3380e8069a480dfbc583e5ccff19d",
@@ -88,8 +126,8 @@
 		{
 			"importpath": "github.com/docker/libcontainer",
 			"repository": "https://github.com/docker/libcontainer",
-			"revision": "83a102cc68a09d890cce3b6c2e5c14c49e6373a0",
-			"branch": "master"
+			"revision": "a1fe3f1c7ad2e8eebe6d59e573f04d2b10961cf6",
+			"branch": "HEAD"
 		},
 		{
 			"importpath": "github.com/docker/libcontainer/cgroups",
@@ -109,6 +147,12 @@
 			"importpath": "github.com/fsouza/go-dockerclient",
 			"repository": "https://github.com/fsouza/go-dockerclient",
 			"revision": "1991acc6d7b56fde34281b115e11596833e8d7de",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/getsentry/raven-go",
+			"repository": "https://github.com/getsentry/raven-go",
+			"revision": "74c334d7b8aaa4fd1b4fc6aa428c36fed1699e28",
 			"branch": "master"
 		},
 		{
@@ -336,6 +380,12 @@
 			"revision": "2c00daeb6c3b45114c80ac44119e7b8801fdd852",
 			"branch": "master",
 			"path": "/capability"
+		},
+		{
+			"importpath": "github.com/tobi/airbrake-go",
+			"repository": "https://github.com/tobi/airbrake-go",
+			"revision": "5b5e269e1bc398d43f67e43dafff3414a59cd5a2",
+			"branch": "master"
 		},
 		{
 			"importpath": "golang.org/x/crypto/bcrypt",

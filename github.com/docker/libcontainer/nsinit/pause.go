@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 )
 
@@ -14,10 +14,10 @@ var pauseCommand = cli.Command{
 	Action: func(context *cli.Context) {
 		container, err := getContainer(context)
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 		if err = container.Pause(); err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 	},
 }
@@ -31,10 +31,10 @@ var unpauseCommand = cli.Command{
 	Action: func(context *cli.Context) {
 		container, err := getContainer(context)
 		if err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 		if err = container.Resume(); err != nil {
-			logrus.Fatal(err)
+			log.Fatal(err)
 		}
 	},
 }

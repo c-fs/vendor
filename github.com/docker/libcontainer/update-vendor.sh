@@ -44,7 +44,6 @@ clone git github.com/codegangsta/cli 1.1.0
 clone git github.com/coreos/go-systemd v2
 clone git github.com/godbus/dbus v2
 clone git github.com/Sirupsen/logrus v0.7.3
-clone git github.com/syndtr/gocapability 66ef2aa
-clone git github.com/golang/protobuf 655cdfa588ea
+clone git github.com/syndtr/gocapability 8e4cdcb
 
 # intentionally not vendoring Docker itself...  that'd be a circle :)
