@@ -32,7 +32,7 @@ var ErrClosed = errors.New("dbus: connection closed by user")
 type Conn struct {
 	transport
 
-	busObj BusObject
+	busObj *Object
 	unixFD bool
 	uuid   string
 
@@ -46,7 +46,7 @@ type Conn struct {
 	calls    map[uint32]*Call
 	callsLck sync.RWMutex
 
-	handlers    map[ObjectPath]map[string]exportWithMapping
+	handlers    map[ObjectPath]map[string]interface{}
 	handlersLck sync.RWMutex
 
 	out    chan *Message
@@ -157,7 +157,7 @@ func newConn(tr transport) (*Conn, error) {
 	conn.transport = tr
 	conn.calls = make(map[uint32]*Call)
 	conn.out = make(chan *Message, 10)
-	conn.handlers = make(map[ObjectPath]map[string]exportWithMapping)
+	conn.handlers = make(map[ObjectPath]map[string]interface{})
 	conn.nextSerial = 1
 	conn.serialUsed = map[uint32]bool{0: true}
 	conn.busObj = conn.Object("org.freedesktop.DBus", "/org/freedesktop/DBus")
@@ -166,7 +166,7 @@ func newConn(tr transport) (*Conn, error) {
 
 // BusObject returns the object owned by the bus daemon which handles
 // administrative requests.
-func (conn *Conn) BusObject() BusObject {
+func (conn *Conn) BusObject() *Object {
 	return conn.busObj
 }
 
@@ -175,13 +175,6 @@ func (conn *Conn) BusObject() BusObject {
 // not be called on shared connections.
 func (conn *Conn) Close() error {
 	conn.outLck.Lock()
-	if conn.closed {
-		// inWorker calls Close on read error, the read error may
-		// be caused by another caller calling Close to shutdown the
-		// dbus connection, a double-close scenario we prevent here.
-		conn.outLck.Unlock()
-		return nil
-	}
 	close(conn.out)
 	conn.closed = true
 	conn.outLck.Unlock()
@@ -303,33 +296,18 @@ func (conn *Conn) inWorker() {
 				// as per http://dbus.freedesktop.org/doc/dbus-specification.html ,
 				// sender is optional for signals.
 				sender, _ := msg.Headers[FieldSender].value.(string)
-				if iface == "org.freedesktop.DBus" && sender == "org.freedesktop.DBus" {
-					if member == "NameLost" {
-						// If we lost the name on the bus, remove it from our
-						// tracking list.
-						name, ok := msg.Body[0].(string)
-						if !ok {
-							panic("Unable to read the lost name")
+				if iface == "org.freedesktop.DBus" && member == "NameLost" &&
+					sender == "org.freedesktop.DBus" {
+
+					name, _ := msg.Body[0].(string)
+					conn.namesLck.Lock()
+					for i, v := range conn.names {
+						if v == name {
+							copy(conn.names[i:], conn.names[i+1:])
+							conn.names = conn.names[:len(conn.names)-1]
 						}
-						conn.namesLck.Lock()
-						for i, v := range conn.names {
-							if v == name {
-								conn.names = append(conn.names[:i],
-									conn.names[i+1:]...)
-							}
-						}
-						conn.namesLck.Unlock()
-					} else if member == "NameAcquired" {
-						// If we acquired the name on the bus, add it to our
-						// tracking list.
-						name, ok := msg.Body[0].(string)
-						if !ok {
-							panic("Unable to read the acquired name")
-						}
-						conn.namesLck.Lock()
-						conn.names = append(conn.names, name)
-						conn.namesLck.Unlock()
 					}
+					conn.namesLck.Unlock()
 				}
 				signal := &Signal{
 					Sender: sender,
@@ -339,7 +317,11 @@ func (conn *Conn) inWorker() {
 				}
 				conn.signalsLck.Lock()
 				for _, ch := range conn.signals {
-					ch <- signal
+					// don't block trying to send a signal
+					select {
+					case ch <- signal:
+					default:
+					}
 				}
 				conn.signalsLck.Unlock()
 			case TypeMethodCall:
@@ -375,7 +357,7 @@ func (conn *Conn) Names() []string {
 }
 
 // Object returns the object identified by the given destination name and path.
-func (conn *Conn) Object(dest string, path ObjectPath) BusObject {
+func (conn *Conn) Object(dest string, path ObjectPath) *Object {
 	return &Object{conn, dest, path}
 }
 
@@ -524,10 +506,6 @@ func (conn *Conn) SupportsUnixFDs() bool {
 type Error struct {
 	Name string
 	Body []interface{}
-}
-
-func NewError(name string, body []interface{}) *Error {
-	return &Error{name, body}
 }
 
 func (e Error) Error() string {

@@ -2,9 +2,9 @@ package dbus
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
+	"unicode"
 )
 
 var (
@@ -22,49 +22,16 @@ var (
 	}
 )
 
-// exportWithMapping represents an exported struct along with a method name
-// mapping to allow for exporting lower-case methods, etc.
-type exportWithMapping struct {
-	export interface{}
-
-	// Method name mapping; key -> struct method, value -> dbus method.
-	mapping map[string]string
-}
-
 // Sender is a type which can be used in exported methods to receive the message
 // sender.
 type Sender string
 
-func exportedMethod(export exportWithMapping, name string) reflect.Value {
-	if export.export == nil {
+func exportedMethod(v interface{}, name string) reflect.Value {
+	if v == nil {
 		return reflect.Value{}
 	}
-
-	// If a mapping was included in the export, check the map to see if we
-	// should be looking for a different method in the export.
-	if export.mapping != nil {
-		for key, value := range export.mapping {
-			if value == name {
-				name = key
-				break
-			}
-
-			// Catch the case where a method is aliased but the client is calling
-			// the original, e.g. the "Foo" method was exported mapped to
-			// "foo," and dbus client called the original "Foo."
-			if key == name {
-				return reflect.Value{}
-			}
-		}
-	}
-
-	value := reflect.ValueOf(export.export)
-	m := value.MethodByName(name)
-
-	// Catch the case of attempting to call an unexported method
-	method, ok := value.Type().MethodByName(name)
-
-	if !m.IsValid() || !ok || method.PkgPath != "" {
+	m := reflect.ValueOf(v).MethodByName(name)
+	if !m.IsValid() {
 		return reflect.Value{}
 	}
 	t := m.Type()
@@ -95,7 +62,7 @@ func (conn *Conn) handleCall(msg *Message) {
 		}
 		return
 	}
-	if len(name) == 0 {
+	if len(name) == 0 || unicode.IsLower([]rune(name)[0]) {
 		conn.sendError(errmsgUnknownMethod, sender, serial)
 	}
 	var m reflect.Value
@@ -247,23 +214,10 @@ func (conn *Conn) Emit(path ObjectPath, name string, values ...interface{}) erro
 //
 // Export returns an error if path is not a valid path name.
 func (conn *Conn) Export(v interface{}, path ObjectPath, iface string) error {
-	return conn.ExportWithMap(v, nil, path, iface)
-}
-
-// ExportWithMap works exactly like Export but provides the ability to remap
-// method names (e.g. export a lower-case method).
-//
-// The keys in the map are the real method names (exported on the struct), and
-// the values are the method names to be exported on DBus.
-func (conn *Conn) ExportWithMap(v interface{}, mapping map[string]string, path ObjectPath, iface string) error {
 	if !path.IsValid() {
-		return fmt.Errorf(`dbus: Invalid path name: "%s"`, path)
+		return errors.New("dbus: invalid path name")
 	}
-
 	conn.handlersLck.Lock()
-	defer conn.handlersLck.Unlock()
-
-	// Remove a previous export if the interface is nil
 	if v == nil {
 		if _, ok := conn.handlers[path]; ok {
 			delete(conn.handlers[path], iface)
@@ -271,38 +225,50 @@ func (conn *Conn) ExportWithMap(v interface{}, mapping map[string]string, path O
 				delete(conn.handlers, path)
 			}
 		}
-
 		return nil
 	}
-
-	// If this is the first handler for this path, make a new map to hold all
-	// handlers for this path.
 	if _, ok := conn.handlers[path]; !ok {
-		conn.handlers[path] = make(map[string]exportWithMapping)
+		conn.handlers[path] = make(map[string]interface{})
 	}
-
-	// Finally, save this handler
-	conn.handlers[path][iface] = exportWithMapping{export: v, mapping: mapping}
-
+	conn.handlers[path][iface] = v
+	conn.handlersLck.Unlock()
 	return nil
 }
 
-// ReleaseName calls org.freedesktop.DBus.ReleaseName and awaits a response.
+// ReleaseName calls org.freedesktop.DBus.ReleaseName. You should use only this
+// method to release a name (see below).
 func (conn *Conn) ReleaseName(name string) (ReleaseNameReply, error) {
 	var r uint32
 	err := conn.busObj.Call("org.freedesktop.DBus.ReleaseName", 0, name).Store(&r)
 	if err != nil {
 		return 0, err
 	}
+	if r == uint32(ReleaseNameReplyReleased) {
+		conn.namesLck.Lock()
+		for i, v := range conn.names {
+			if v == name {
+				copy(conn.names[i:], conn.names[i+1:])
+				conn.names = conn.names[:len(conn.names)-1]
+			}
+		}
+		conn.namesLck.Unlock()
+	}
 	return ReleaseNameReply(r), nil
 }
 
-// RequestName calls org.freedesktop.DBus.RequestName and awaits a response.
+// RequestName calls org.freedesktop.DBus.RequestName. You should use only this
+// method to request a name because package dbus needs to keep track of all
+// names that the connection has.
 func (conn *Conn) RequestName(name string, flags RequestNameFlags) (RequestNameReply, error) {
 	var r uint32
 	err := conn.busObj.Call("org.freedesktop.DBus.RequestName", 0, name, flags).Store(&r)
 	if err != nil {
 		return 0, err
+	}
+	if r == uint32(RequestNameReplyPrimaryOwner) {
+		conn.namesLck.Lock()
+		conn.names = append(conn.names, name)
+		conn.namesLck.Unlock()
 	}
 	return RequestNameReply(r), nil
 }

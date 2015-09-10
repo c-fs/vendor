@@ -114,8 +114,8 @@
 		{
 			"importpath": "github.com/godbus/dbus",
 			"repository": "https://github.com/godbus/dbus",
-			"revision": "e5cbcd13e3ec6bc46adf1c690e4de6284086dda6",
-			"branch": "master"
+			"revision": "939230d2086a4f1870e04c52e0a376c25bae0ec4",
+			"branch": "HEAD"
 		},
 		{
 			"importpath": "github.com/gogo/protobuf/proto",
